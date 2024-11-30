@@ -29,7 +29,7 @@ HRLib.OnPlDisc(function(source)
     local playerState <const>, playerIdentifier <const> = Player(source).state?.hasComservTasks, HRLib.PlayerIdentifier(source, 'license')
     if playerState then
         if not playerState.alreadyHave then
-            MySQL.insert('INSERT INTO `community_services` (`identifier`, `tasksCount`, `normalClothes`) VALUES (?, ?, ?);', { playerIdentifier, playerState.tasksCount, playerState.skin })
+            MySQL.insert('INSERT INTO `community_services` (`identifier`, `tasksCount`, `normalClothes`, `playerItems`) VALUES (?, ?, ?, ?);', { playerIdentifier, playerState.tasksCount, playerState.skin, json.encode(playerState.playerItems) })
         else
             MySQL.update('UPDATE `community_services` SET `tasksCount` = ? WHERE `identifier` = ?;', { playerState.tasksCount, playerIdentifier })
         end
@@ -39,28 +39,37 @@ end)
 -- Events
 
 RegisterNetEvent('HRComserv:finishedServices', function()
-    local source <const>, playerIdentifier <const> = source, HRLib.PlayerIdentifier(source, 'license')
+    if Player(source).state.hasComservTasks then
+        local source <const>, playerIdentifier <const> = source, HRLib.PlayerIdentifier(source, 'license')
 
-    if MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier }) then
-        MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
+        if MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier }) then
+            MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
+        end
+
+        if GetResourceState('ox_inventory') == 'started' or GetResourceState('qb-inventory') == 'started' then
+            local playerItems <const>, inventoryFunctions <const> = Player(source).state.hasComservTasks.playerItems, exports[GetResourceState('ox_inventory') == 'started' and 'ox_inventory' or 'qb-inventory']
+            if playerItems then
+                for i=1, #playerItems do
+                    inventoryFunctions:AddItem(source, playerItems[i].name, playerItems[i].count)
+                end
+            end
+        end
+
+        Player(source).state.hasComservTasks = nil
     end
-
-    Player(source).state.hasComservTasks = nil
 end)
 
-RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType, playerItems)
-    HRLib.Notify(source, ('%s %s'):format(invType, playerItems))
-    ---@type function
-    local removeItem = exports[invType == 'ox' and 'ox_inventory' or 'qb-inventory']['RemoveItem']
-    for i=1, #playerItems do
-        removeItem(source, playerItems[i].name, playerItems[i].count)
-    end
-end)
+RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType)
+    if Player(source).state.hasComservTasks then
+        local inventoryFunctions <const>, playerItems <const> = exports[invType == 'ox' and 'ox_inventory' or 'qb-inventory'], invType == 'ox' and exports.ox_inventory:GetInventoryItems(source) or exports['qb-core']:GetCoreObject().GetPlayer(source).PlayerData.items
 
-RegisterNetEvent('HRComserv:restoreAllPlayerItems', function(invType)
-    local playerItems <const>, addItem <const> = Player(source).state.hasComservTasks.playerItems, exports[invType == 'ox' and 'ox_inventory' or 'qb-inventory']['AddItem'] --[[@as function]]
-    for i=1, #playerItems do
-        addItem(source, playerItems[i].name, playerItems[i].count)
+        for _,v in pairs(playerItems) do
+            inventoryFunctions:RemoveItem(source, v.name, v.count)
+        end
+
+        local hasComservTasks = Player(source).state.hasComservTasks
+        hasComservTasks.playerItems = playerItems
+        Player(source).state.hasComservTasks = hasComservTasks
     end
 end)
 
@@ -71,7 +80,7 @@ HRLib.RegCommand('comserv', true, true, function(args, _, _, FPlayer)
     if HRLib.DoesIdExist(playerId) then
         if tasksCount then
             Player(playerId --[[@as integer]]).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', playerId) }
-            TriggerClientEvent('HRComserv:comservPlayer', playerId --[[@as integer]], tasksCount)
+            TriggerClientEvent('HRComserv:comservPlayer', playerId --[[@as integer]])
             FPlayer:Notify(Translation.comserv_successful, 'success')
         else
             FPlayer:Notify(Translation.comserv_failed_invalidTasksCount, 'error')

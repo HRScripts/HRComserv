@@ -1,85 +1,77 @@
 RemoveMarkers = true
 local HRLib <const>, Translation <const> = HRLib --[[@as HRLibClientFunctions]], Translation --[[@as HRComservTranslation]]
 local config <const>, functions <const> = HRLib.require(('@%s/config.lua'):format(GetCurrentResourceName())) --[[@as HRComservConfig]], HRLib.require('@HRComserv/client/modules/functions.lua') --[[@as HRComservClientFunctions]]
-local currentTasks
+local firstSpawned = true
 
 -- OnEvents
 
 HRLib.OnPlSpawn(function()
-    local tasks <const> = LocalPlayer.state.hasComservTasks
-    if tasks then
-        TriggerEvent('HRComserv:comservPlayer', tasks.tasksCount)
+    if firstSpawned then
+        local tasks <const> = LocalPlayer.state.hasComservTasks
+        if tasks then
+            TriggerEvent('HRComserv:comservPlayer', tasks.tasksCount)
+        end
+
+        firstSpawned = false
     end
 end)
 
 -- Callbacks
 
 HRLib.CreateCallback('getSkin', true, function()
-    return functions.getClothes()
+    return functions.getClothes(PlayerPedId())
 end)
 
 -- Events
 
-RegisterNetEvent('HRComserv:comservPlayer', function(tasksCount)
-    currentTasks = tasksCount
+RegisterNetEvent('HRComserv:comservPlayer', function()
     RemoveMarkers = nil
 
-    local randomLocation <const>, playerPed <const> = config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId()
+    local randomLocation <const>, playerPed <const>, hasComservTasks = config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId(), LocalPlayer.state.hasComservTasks
+    local currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
 
-    local hasComservTasks <const> = LocalPlayer.state.hasComservTasks
-    CreateThread(function()
-        while not hasComservTasks do
-            Wait(10)
-        end
+    while not hasComservTasks do
+        Wait(10)
 
-        hasComservTasks.pedItems = functions.removeAllPlayerItems()
-        LocalPlayer.state:set('hasComservTasks', hasComservTasks, true)
-    end)
-
-    SetEntityCoordsNoOffset(playerPed, randomLocation.spawnCoords) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
-    functions.setClothes(playerPed)
-
-    HRLib.showTextUI(Translation.prefix_textUI:format(currentTasks))
-
-    for i=1, #randomLocation.tasks do
-        functions.createMarker(randomLocation.tasks[i].coords)
+        hasComservTasks = LocalPlayer.state.hasComservTasks
     end
 
-    for i=1, #config.disabledControls do
-        DisableControlAction(0, HRLib.Keys[config.disabledControls[i]], true)
+    hasComservTasks = setmetatable(hasComservTasks, {
+        __call = function(self)
+            rawset(self, 'tasksCount', tonumber(rawget(self, 'tasksCount')) - 1)
+            rawset(self, 'playerItems', LocalPlayer.state.hasComservTasks.playerItems)
+            LocalPlayer.state:set('hasComservTasks', self, true)
+        end
+    })
+
+    functions.removeAllPlayerItems()
+    functions.setClothes(playerPed)
+    SetEntityCoordsNoOffset(playerPed, randomLocation.spawnCoords) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
+    HRLib.showTextUI(Translation.prefix_textUI:format(hasComservTasks.tasksCount))
+
+    if config.disableInventory then
+        LocalPlayer.state:set('invBusy', true, true)
     end
 
     CreateThread(function()
         while not RemoveMarkers do
             Wait(4)
 
-            if IsControlJustPressed(0, HRLib.Keys[config.taskButton]) then
-                for i=1, #randomLocation.tasks do
-                    local curr <const> = randomLocation.tasks[i]
-                    if #(GetEntityCoords(playerPed) - vector3(curr.coords.x, curr.coords.y, curr.coords.z)) <= 1.5 then
-                        functions.startTask(curr.type, curr.coords)
+            functions.createMarker(currentTask.coords)
 
-                        currentTasks -= 1
+            if IsControlJustPressed(0, HRLib.Keys[config.taskButton]) and #(GetEntityCoords(playerPed) - vector3(currentTask.coords.x, currentTask.coords.y, currentTask.coords.z)) <= 1.5 then
+                functions.startTask(currentTask.type, currentTask.coords)
+                hasComservTasks()
 
-                        local newHasComservTasks = LocalPlayer.state.hasComservTasks
-                        newHasComservTasks.tasksCount = currentTasks
-                        LocalPlayer.state:set('hasComservTasks', newHasComservTasks, true)
+                if hasComservTasks.tasksCount == 0 then
+                    TriggerEvent('HRComserv:stopComserv')
 
-                        if currentTasks == 0 then
-                            TriggerServerEvent('HRComserv:finishedServices')
-
-                            RemoveMarkers = true
-                            currentTasks = nil
-
-                            SetEntityCoordsNoOffset(playerPed, config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
-                            HRLib.hideTextUI()
-                        else
-                            HRLib.showTextUI(Translation.prefix_textUI:format(currentTasks))
-                        end
-
-                        break
-                    end
+                    return
+                else
+                    HRLib.showTextUI(Translation.prefix_textUI:format(hasComservTasks.tasksCount))
                 end
+
+                currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
             end
         end
     end)
@@ -98,11 +90,15 @@ end)
 
 RegisterNetEvent('HRComserv:stopComserv', function()
     RemoveMarkers = true
-    currentTasks = nil
 
-    SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
-    functions.setClothes(LocalPlayer.state.hasComservTasks.normalClothes)
     HRLib.hideTextUI()
+    functions.restoreAllPlayerItems()
+    SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
+    functions.setClothes(PlayerPedId(), json.decode(LocalPlayer.state.hasComservTasks.skin))
 
-    LocalPlayer.state:set('hasComservTasks', nil, true)
+    if config.disableInventory then
+        LocalPlayer.state:set('invBusy', false, true)
+    end
+
+    TriggerServerEvent('HRComserv:finishedServices')
 end)

@@ -10,6 +10,8 @@ config.tasksDuration = {
 
 config.taskButton = 'E'
 
+config.restorePlayerItems = true
+
 config.comservLocations = {
     {
         spawnCoords = vector3(1772.3788, 3797.0134, 33.9043),
@@ -34,7 +36,7 @@ config.comservLocations = {
         allowedDistance = 25.0,
         tasks = {
             {
-                coords = vector4(158.9692, -1003.9127, 29.3883, 159.6395),
+                coords = vector4(156.7134, -1007.0770, 29.5411, 160.8827),
                 type = 'hammerFix'
             },
             {
@@ -63,11 +65,7 @@ config.comservClothes = { -- Each field's value is the cloth number
 	shoes_2 = 0
 }
 
-config.disabledControls = { -- You can add the disabled controls during comserv here
-    'F2',
-    'TAB',
-    'F1'
-}
+config.disableInventory = true
 
 config.tasksMarker = {
     type = 21,
@@ -81,6 +79,6 @@ config.tasksMarker = {
 
 config.finishComservPosition = vector3(422.9242, -979.4069, 30.7094)
 
-config.restorePlayerWeapons = true -- Choose to restore the player's weapons after finishing it's tasks
+config.restorePlayerItems = true -- Choose to restore the player's items/weapons after finishing it's tasks
 
 return config
