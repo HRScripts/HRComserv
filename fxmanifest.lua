@@ -5,7 +5,7 @@ lua54 'yes'
 name 'HRComserv'
 author 'HRScripts Development'
 description 'A community services resource available for Ox, ESX & QBCore frameworks'
-version '1.0.0'
+version '1.0.1'
 
 shared_script '@HRLib/import.lua'
 
