@@ -7,9 +7,8 @@ local firstSpawned = true
 
 HRLib.OnPlSpawn(function()
     if firstSpawned then
-        local tasks <const> = LocalPlayer.state.hasComservTasks
-        if tasks then
-            TriggerEvent('HRComserv:comservPlayer', tasks.tasksCount)
+        if LocalPlayer.state.hasComservTasks then
+            TriggerEvent('HRComserv:comservPlayer')
         end
 
         firstSpawned = false

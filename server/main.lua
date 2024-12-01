@@ -3,14 +3,14 @@ local HRLib <const>, MySQL <const>, Translation <const> = HRLib --[[@as HRLibSer
 -- OnEvents
 
 HRLib.OnStart(nil, function()
-    MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL DEFAULT \'[]\',\n    `pedItems` json NOT NULL DEFAULT \'[]\'\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
+    MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL DEFAULT \'[]\',\n    `playerItems` json NOT NULL DEFAULT \'[]\'\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
 
     local punishedPlayers <const> = MySQL.query.await('SELECT * FROM `community_services`;')
     if punishedPlayers[1] then
         local players <const> = GetPlayers()
         for i=1, #players do
             HRLib.table.focusedArray(punishedPlayers, { identifier = HRLib.PlayerIdentifier(tonumber(players[i]) --[[@as integer]], 'license') }, function(_, curr)
-                Player(players[i]).state.hasComservTasks = { tasksCount = curr.tasksCount, skin = curr.normalClothes, pedItems = json.decode(curr.pedItems), alreadyHave = true }
+                Player(players[i]).state.hasComservTasks = { tasksCount = curr.tasksCount, skin = curr.normalClothes, playerItems = json.decode(curr.playerItems), alreadyHave = true }
 
                 TriggerClientEvent('HRComserv:comservPlayer', tonumber(players[i]) --[[@as integer]], curr.tasksCount)
             end)
@@ -21,7 +21,7 @@ end)
 HRLib.OnPlJoining(function(source)
     local playerComservs <const> = MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { HRLib.PlayerIdentifier(source, 'license') })
     if playerComservs then
-        Player(source).state.hasComservTasks = { tasksCount = playerComservs.tasksCount, skin = playerComservs.normalClothes, pedItems = json.decode(playerComservs.pedItems), alreadyHave = true }
+        Player(source).state.hasComservTasks = { tasksCount = playerComservs.tasksCount, skin = playerComservs.normalClothes, playerItems = json.decode(playerComservs.playerItems), alreadyHave = true }
     end
 end)
 
