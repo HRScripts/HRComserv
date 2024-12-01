@@ -73,6 +73,26 @@ RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType)
     end
 end)
 
+-- Exports
+
+exports('comservPlayer', function(playerId, tasksCount)
+    if not Player(playerId).state.hasComservTasks and type(playerId) == 'number' and type(tasksCount) == 'number' then
+        Player(playerId).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', source) }
+        TriggerClientEvent('HRComserv:comservPlayer', playerId)
+    end
+end)
+
+exports('stopPlayerComserv', function(playerId)
+    if Player(playerId).state.hasComservTasks then
+        TriggerClientEvent('HRComserv:stopComserv', playerId)
+
+        local playerIdentifier <const> = HRLib.PlayerIdentifier(playerId --[[@as integer]], 'license')
+        if MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier }) then
+            MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
+        end
+    end
+end)
+
 -- Commands
 
 HRLib.RegCommand('comserv', true, true, function(args, _, _, FPlayer)
