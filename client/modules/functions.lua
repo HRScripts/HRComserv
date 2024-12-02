@@ -7,7 +7,7 @@ functions.setClothes = function(targetPed, oldClothes)
         exports['illenium-appearance']:setPedComponents(targetPed, oldClothes or functions.convertComponents(config.comservClothes, exports['illenium-appearance']:getPedComponents(targetPed)))
     elseif resourceName == 2 then
         config.comservClothes.sex = IsPedMale(targetPed) and 0 or 1
-        TriggerEvent('skinchanger:loadSkin', config.comservClothes)
+        TriggerEvent('skinchanger:loadSkin', oldClothes or config.comservClothes)
     end
 end
 
