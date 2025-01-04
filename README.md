@@ -27,13 +27,12 @@ For a quick preview of how HRComserv works, check out this video:
 1. **Download** the script and it's dependencies.
    
 2. **Place the Script** in the `resources` folder of your server.
-
-3. **Add to Server Configuration**:
+3. **Configure** the script from it's `config.lua` file.
+4. **Add to Server Configuration**:
    - In your `server.cfg` or equivalent, add the following line to start the script:
 
         `start HRComserv`
-
-4. **Restart Your Server** and you're ready to go!
+5. **Restart Your Server** and you're ready to go!
 
 ## Documentation
 
