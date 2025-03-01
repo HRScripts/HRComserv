@@ -6,7 +6,7 @@ name 'HRComserv'
 author 'HRScripts Development'
 description 'A community services resource available for Ox, ESX & QBCore frameworks'
 repository 'https://github.com/HRScripts/HRComserv'
-version '1.1.1'
+version '1.1.0'
 
 shared_script '@HRLib/import.lua'
 
