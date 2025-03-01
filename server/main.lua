@@ -15,9 +15,9 @@ local getIdentifiersForDesc = function(staffName, targetPlayerId, currMessage)
             identifiers[i] = curr == 'name' and GetPlayerName(targetPlayerId) or staffName
         else
             if curr == 'discord' then
-                identifiers[#identifiers+1] = ('<@%s>'):format(HRLib.PlayerIdentifier(targetPlayerId, curr, true))
+                identifiers[#identifiers+1] = ('<@%s>'):format(HRLib.PlayerIdentifier(targetPlayerId, curr, true) or 'undefined')
             else
-                identifiers[#identifiers+1] = HRLib.PlayerIdentifier(targetPlayerId, curr)
+                identifiers[#identifiers+1] = HRLib.PlayerIdentifier(targetPlayerId, curr) or 'undefined'
             end
         end
     end
