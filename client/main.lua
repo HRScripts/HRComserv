@@ -1,5 +1,5 @@
 RemoveMarkers = true
-local HRLib <const>, Translation <const> = HRLib --[[@as HRLibClientFunctions]], Translation --[[@as HRComservTranslation]]
+local HRLib <const>, Translation <const> = HRLib --[[]], Translation --[[@as HRComservTranslation]]
 local config <const>, functions <const> = HRLib.require(('@%s/config.lua'):format(GetCurrentResourceName())) --[[@as HRComservConfig]], HRLib.require('@HRComserv/client/modules/functions.lua') --[[@as HRComservClientFunctions]]
 local firstSpawned = true
 
@@ -87,7 +87,7 @@ RegisterNetEvent('HRComserv:comservPlayer', function()
     end)
 end)
 
-RegisterNetEvent('HRComserv:stopComserv', function()
+RegisterNetEvent('HRComserv:stopComserv', function(isFromCommand)
     RemoveMarkers = true
 
     HRLib.hideTextUI()
@@ -99,5 +99,5 @@ RegisterNetEvent('HRComserv:stopComserv', function()
         LocalPlayer.state:set('invBusy', false, true)
     end
 
-    TriggerServerEvent('HRComserv:finishedServices')
+    TriggerServerEvent('HRComserv:finishedServices', isFromCommand)
 end)

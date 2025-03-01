@@ -2,6 +2,68 @@ local config <const> = {}
 
 config.language = 'en'
 
+config.discordLogs = {
+    enable = true,
+    webHookURL = 'https://discord.com/webhooks/......',
+    settings = {
+        botName = 'Logs',
+        title = 'Community Services',
+        color = 999999,
+        messages = {
+            comserv_message = {
+                enable = true,
+                description = 'Player %s was sent to community services.\n\n\nLicense: %s\nSteam Hex: %s\nFiveM Id: %s\nDiscord: %s\nStaff Name: %s',
+                showedIdentifiers = {
+                    'name',
+                    'license',
+                    'steam',
+                    'fivem',
+                    'discord',
+                    'staffName'
+                }
+            },
+            finishComserv_message = {
+                enable = true,
+                description = 'Player %s finished its community services.\n\n\nLicense: %s\nSteam Hex: %s\nFiveM Id: %s\nDiscord: %s',
+                showedIdentifiers = {
+                    'name',
+                    'license',
+                    'steam',
+                    'fivem',
+                    'discord'
+                }
+            },
+            stopComserv_message = {
+                enable = true,
+                description = 'Community services of player %s were stopped.\n\n\nLicense: %s\nSteam Hex: %s\nFiveM Id: %s\nDiscord: %s\nStaff Name: %s',
+                showedIdentifiers = {
+                    'name',
+                    'license',
+                    'steam',
+                    'fivem',
+                    'discord',
+                    'staffName'
+                }
+            }
+        }
+    }
+}
+
+--[[
+    The count of the showed identifiers for each message must be same as the `%s` symbols count in the description (the arrangement of the showed identifiers here is important!)
+    Possible Identifiers:
+    'name',
+    'steam',
+    'licese',
+    'license2',
+    'fivem',
+    'discord',
+    'ip',
+    'xbl',
+    'live',
+    'staffName' -- This identifier is not available for the finishComserv_message!
+]]
+
 config.tasksDuration = {
     hammerFix = 5000,
     sweeping = 5000,

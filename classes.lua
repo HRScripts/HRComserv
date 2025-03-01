@@ -1,5 +1,6 @@
 ---@class HRComservConfig
 ---@field language string
+---@field discordLogs { enable: boolean, webHookURL: string, settings: { botName: string, title: string, color: integer<6>, messages: { enable: boolean, description: string, showedIdentifiers: string[] }[] } }
 ---@field tasksDuration { hammerFix: integer, sweeping: integer, digging: integer }
 ---@field taskButton integer<360>
 ---@field comservLocations { spawnCoords: vector3, allowedDistance: number, tasks: { coords: vector4, type: 'hammerFix'|'digging'|'sweeping' }[] }[]

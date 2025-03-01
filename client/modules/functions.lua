@@ -1,4 +1,4 @@
-local HRLib <const> = HRLib --[[@as HRLibClientFunctions]]
+local HRLib <const> = HRLib --[[]]
 local config <const>, functions <const> = HRLib.require('@HRComserv/config.lua') --[[@as HRComservConfig]], {}
 
 functions.setClothes = function(targetPed, oldClothes)
@@ -104,7 +104,10 @@ functions.startTask = function(taskType, playerPosition)
 
     SetEntityCoords(playerPed, playerPosition.x, playerPosition.y, GetEntityCoords(playerPed).z - 1) ---@diagnostic disable-line: missing-parameter
     SetEntityHeading(playerPed, playerPosition.w)
-    HRLib.RequestAnimDict(dict)
+
+    if dict then
+        HRLib.RequestAnimDict(dict)
+    end
 
     if taskType == 'hammerFix' then
         TaskPlayAnim(playerPed, dict, anim, 8.0, 8.0, -1, 1, 0.5, false, false, false)

@@ -1,4 +1,29 @@
-local HRLib <const>, MySQL <const>, Translation <const> = HRLib --[[@as HRLibServerFunctions]], MySQL, Translation --[[@as HRComservTranslation]] ---@diagnostic disable-line: undefined-global
+local HRLib <const>, MySQL <const>, Translation <const> = HRLib, MySQL, Translation --[[@as HRComservTranslation]] ---@diagnostic disable-line: undefined-global
+local config <const> = HRLib.require('@HRComserv/config.lua') --[[@as HRComservConfig]]
+
+-- Functions
+
+---@param staffName string
+---@param targetPlayerId integer
+---@param currMessage table
+local getIdentifiersForDesc = function(staffName, targetPlayerId, currMessage)
+    local identifiers <const> = {}
+
+    for i=1, #currMessage.showedIdentifiers do
+        local curr <const> = currMessage.showedIdentifiers[i]
+        if curr == 'name' or curr == 'staffName' then
+            identifiers[i] = curr == 'name' and GetPlayerName(targetPlayerId) or staffName
+        else
+            if curr == 'discord' then
+                identifiers[#identifiers+1] = ('<@%s>'):format(HRLib.PlayerIdentifier(targetPlayerId, curr, true))
+            else
+                identifiers[#identifiers+1] = HRLib.PlayerIdentifier(targetPlayerId, curr)
+            end
+        end
+    end
+
+    return table.unpack(identifiers)
+end
 
 -- OnEvents
 
@@ -38,7 +63,7 @@ end)
 
 -- Events
 
-RegisterNetEvent('HRComserv:finishedServices', function()
+RegisterNetEvent('HRComserv:finishedServices', function(isFromCommand)
     if Player(source).state.hasComservTasks then
         local source <const>, playerIdentifier <const> = source, HRLib.PlayerIdentifier(source, 'license')
 
@@ -52,6 +77,14 @@ RegisterNetEvent('HRComserv:finishedServices', function()
                 for i=1, #playerItems do
                     inventoryFunctions:AddItem(source, playerItems[i].name, playerItems[i].count)
                 end
+            end
+        end
+
+        if not isFromCommand then
+            local currConfig <const> = config.discordLogs
+            local currMessage <const> = currConfig.settings.messages.finishComserv_message
+            if currConfig.enable and currMessage.enable then
+                HRLib.DiscordMsg(currConfig.webHookURL, currConfig.settings.botName, currConfig.settings.title, currMessage.description:format(getIdentifiersForDesc('undefined', source, currMessage)), nil, currConfig.settings.color, '', 'System')
             end
         end
 
@@ -79,6 +112,12 @@ exports('comservPlayer', function(playerId, tasksCount)
     if not Player(playerId).state.hasComservTasks and type(playerId) == 'number' and type(tasksCount) == 'number' then
         Player(playerId).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', source) }
         TriggerClientEvent('HRComserv:comservPlayer', playerId)
+
+        local currConfig <const> = config.discordLogs
+        local currMessage <const> = currConfig.settings.messages.comserv_message
+        if currConfig.enable and currMessage.enable then
+            HRLib.DiscordMsg(currConfig.webHookURL, currConfig.settings.botName, currConfig.settings.title, currMessage.description:format(getIdentifiersForDesc(('(called by %s resource)'):format(GetInvokingResource()), playerId, currMessage)), nil, currConfig.settings.color, '', 'System')
+        end
     end
 end)
 
@@ -95,13 +134,19 @@ end)
 
 -- Commands
 
-HRLib.RegCommand('comserv', true, true, function(args, _, _, FPlayer)
-    local playerId <const>, tasksCount <const> = tonumber(args[1]), tonumber(args[2])
+HRLib.RegCommand('comserv', true, true, function(args, _, IPlayer, FPlayer)
+    local playerId <const>, tasksCount <const> = tonumber(args[1]) --[[@as integer]], tonumber(args[2]) --[[@as integer]]
     if HRLib.DoesIdExist(playerId) then
         if tasksCount then
-            Player(playerId --[[@as integer]]).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', playerId) }
-            TriggerClientEvent('HRComserv:comservPlayer', playerId --[[@as integer]])
+            Player(playerId).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', playerId) }
+            TriggerClientEvent('HRComserv:comservPlayer', playerId)
             FPlayer:Notify(Translation.comserv_successful, 'success')
+
+            local currConfig <const> = config.discordLogs
+            local currMessage <const> = currConfig.settings.messages.comserv_message
+            if currConfig.enable and currMessage.enable then
+                HRLib.DiscordMsg(currConfig.webHookURL, currConfig.settings.botName, currConfig.settings.title, currMessage.description:format(getIdentifiersForDesc(IPlayer.name, playerId, currMessage)), nil, currConfig.settings.color, '', 'System')
+            end
         else
             FPlayer:Notify(Translation.comserv_failed_invalidTasksCount, 'error')
         end
@@ -110,17 +155,23 @@ HRLib.RegCommand('comserv', true, true, function(args, _, _, FPlayer)
     end
 end, true, { help = Translation.suggestions.comserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.comserv_arg1_help }, { name = 'tasksCount', help = Translation.suggestions.comserv_arg2_help } } })
 
-HRLib.RegCommand('stopComserv', true, true, function(args, _, _, FPlayer)
-    local playerId <const> = tonumber(args[1])
+HRLib.RegCommand('stopComserv', true, true, function(args, _, IPlayer, FPlayer)
+    local playerId <const> = tonumber(args[1]) --[[@as integer]]
     if HRLib.DoesIdExist(playerId) then
-        if Player(playerId --[[@as integer]]).state.hasComservTasks then
-            TriggerClientEvent('HRComserv:stopComserv', playerId --[[@as integer]])
-            FPlayer:Notify(Translation.stopComserv_successful:format(GetPlayerName(playerId --[[@as integer]])), 'success')
+        if Player(playerId).state.hasComservTasks then
+            TriggerClientEvent('HRComserv:stopComserv', playerId, true)
+            FPlayer:Notify(Translation.stopComserv_successful:format(GetPlayerName(playerId)), 'success')
+
+            local currConfig <const> = config.discordLogs
+            local currMessage <const> = currConfig.settings.messages.stopComserv_message
+            if currConfig.enable and currMessage.enable then
+                HRLib.DiscordMsg(currConfig.webHookURL, currConfig.settings.botName, currConfig.settings.title, currMessage.description:format(getIdentifiersForDesc(IPlayer.name, playerId, currMessage)), nil, currConfig.settings.color, '', 'System')
+            end
         else
             FPlayer:Notify(Translation.stopComserv_failed_hasNoComserv)
         end
 
-        local playerIdentifier <const> = HRLib.PlayerIdentifier(playerId --[[@as integer]], 'license')
+        local playerIdentifier <const> = HRLib.PlayerIdentifier(playerId, 'license')
         if MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier }) then
             MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
         end
