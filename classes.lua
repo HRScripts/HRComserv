@@ -9,6 +9,7 @@
 ---@field tasksMarker { type: integer<43>, colour: { red: integer<255>, green: integer<255>, blue: integer<255> }, alpha: integer<255> }
 ---@field finishComservPosition vector3
 ---@field restorePlayerItems boolean
+---@field removePlayerItems boolean
 
 ---@class HRComservClientFunctions
 ---@field setClothes fun(targetPed: integer)

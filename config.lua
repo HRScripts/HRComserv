@@ -72,8 +72,6 @@ config.tasksDuration = {
 
 config.taskButton = 'E'
 
-config.restorePlayerItems = true
-
 config.comservLocations = {
     {
         spawnCoords = vector3(1772.3788, 3797.0134, 33.9043),
@@ -129,6 +127,12 @@ config.comservClothes = { -- Each field's value is the cloth number
 
 config.disableInventory = true
 
+config.restorePlayerItems = true -- Choose to restore the player's items/weapons after finishing it's tasks
+
+config.removePlayerItems = true
+
+config.finishComservPosition = vector3(422.9242, -979.4069, 30.7094)
+
 config.tasksMarker = {
     type = 21,
     colour = {
@@ -138,9 +142,5 @@ config.tasksMarker = {
     },
     alpha = 255
 }
-
-config.finishComservPosition = vector3(422.9242, -979.4069, 30.7094)
-
-config.restorePlayerItems = true -- Choose to restore the player's items/weapons after finishing it's tasks
 
 return config

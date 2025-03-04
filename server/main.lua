@@ -93,6 +93,8 @@ RegisterNetEvent('HRComserv:finishedServices', function(isFromCommand)
 end)
 
 RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType)
+    if not config.removePlayerItems then return end
+
     if Player(source).state.hasComservTasks then
         local inventoryFunctions <const>, playerItems <const> = exports[invType == 'ox' and 'ox_inventory' or 'qb-inventory'], invType == 'ox' and exports.ox_inventory:GetInventoryItems(source) or exports['qb-core']:GetCoreObject().GetPlayer(source).PlayerData.items
 

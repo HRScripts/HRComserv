@@ -136,8 +136,10 @@ functions.startTask = function(taskType, playerPosition)
     end
 end
 
----@return string[]|{ name: string, count: integer }
+---@return string[]|{ name: string, count: integer }?
 functions.removeAllPlayerItems = function()
+    if not config.removePlayerItems then return end
+
     local inventory <const> = GetResourceState('ox_inventory') and 'ox' or GetResourceState('qb-inventory') and 'qb' or 'standalone'
     if inventory == 'ox' or inventory == 'qb' then
         TriggerServerEvent('HRComserv:removeAllPlayerItems', inventory)
