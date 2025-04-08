@@ -50,6 +50,7 @@ HRLib.OnPlJoining(function(source)
     end
 end)
 
+---@param source integer
 HRLib.OnPlDisc(function(source)
     local playerState <const>, playerIdentifier <const> = Player(source).state?.hasComservTasks, HRLib.PlayerIdentifier(source, 'license')
     if playerState then
@@ -171,11 +172,6 @@ HRLib.RegCommand('stopComserv', true, true, function(args, _, IPlayer, FPlayer)
             end
         else
             FPlayer:Notify(Translation.stopComserv_failed_hasNoComserv)
-        end
-
-        local playerIdentifier <const> = HRLib.PlayerIdentifier(playerId, 'license')
-        if MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier }) then
-            MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
         end
     else
         FPlayer:Notify(Translation.id_notFound, 'error')
