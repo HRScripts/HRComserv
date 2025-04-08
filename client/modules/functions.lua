@@ -1,4 +1,4 @@
-local HRLib <const> = HRLib --[[]]
+local HRLib <const> = HRLib
 local config <const>, functions <const> = HRLib.require('@HRComserv/config.lua') --[[@as HRComservConfig]], {}
 
 functions.setClothes = function(targetPed, oldClothes)
@@ -144,7 +144,7 @@ functions.removeAllPlayerItems = function()
     if inventory == 'ox' or inventory == 'qb' then
         TriggerServerEvent('HRComserv:removeAllPlayerItems', inventory)
     elseif inventory == 'standalone' then
-        local pedWeapons <const>, playerPed <const> = HRLib.GetAllPedWeapons(), PlayerPedId()
+        local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), PlayerPedId()
 
         for i=1, #pedWeapons do
             RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
