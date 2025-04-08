@@ -26,7 +26,7 @@ functions.getClothes = function(targetPed)
     end
 end
 
-functions.convertComponents = function(oldSkin, components) -- Function taked by illenium-appearance
+functions.convertComponents = function(oldSkin, components) -- Function is taken from illenium-appearance
     return {
         {
             component_id = 0,

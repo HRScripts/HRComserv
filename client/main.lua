@@ -7,6 +7,10 @@ local firstSpawned = true
 
 HRLib.OnPlSpawn(function()
     if firstSpawned then
+        while IsScreenFadedOut() or not NetworkIsPlayerActive(PlayerId()) do
+            Wait(10)
+        end
+
         if LocalPlayer.state.hasComservTasks then
             TriggerEvent('HRComserv:comservPlayer')
         end
