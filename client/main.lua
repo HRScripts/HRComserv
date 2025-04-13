@@ -5,13 +5,17 @@ local firstSpawned = true
 
 -- OnEvents
 
+if LocalPlayer.state.hasComservTasks and IsEntityOnScreen(PlayerPedId()) then
+    TriggerEvent('HRComserv:comservPlayer')
+end
+
 HRLib.OnPlSpawn(function()
     if firstSpawned then
-        while IsScreenFadedOut() or not NetworkIsPlayerActive(PlayerId()) do
+        while not IsEntityOnScreen(PlayerPedId()) do
             Wait(10)
         end
 
-        if LocalPlayer.state.hasComservTasks then
+        if LocalPlayer.state.hasComservTasks and not RemoveMarkers then
             TriggerEvent('HRComserv:comservPlayer')
         end
 
