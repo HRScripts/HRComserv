@@ -156,7 +156,7 @@ HRLib.RegCommand('comserv', true, true, function(args, _, IPlayer, FPlayer)
     else
         FPlayer:Notify(Translation.id_notFound, 'error')
     end
-end, true, { help = Translation.suggestions.comserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.comserv_arg1_help }, { name = 'tasksCount', help = Translation.suggestions.comserv_arg2_help } } })
+end, { help = Translation.suggestions.comserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.comserv_arg1_help }, { name = 'tasksCount', help = Translation.suggestions.comserv_arg2_help } } })
 
 HRLib.RegCommand('stopComserv', true, true, function(args, _, IPlayer, FPlayer)
     local playerId <const> = tonumber(args[1]) --[[@as integer]]
@@ -176,4 +176,4 @@ HRLib.RegCommand('stopComserv', true, true, function(args, _, IPlayer, FPlayer)
     else
         FPlayer:Notify(Translation.id_notFound, 'error')
     end
-end, true, { help = Translation.suggestions.stopComserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.stopComserv_arg1_help } } })
+end, { help = Translation.suggestions.stopComserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.stopComserv_arg1_help } } })
