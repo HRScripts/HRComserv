@@ -13,7 +13,7 @@ HRComserv is a simple, lightweight community services script designed for rolepl
   - `/comserv [id] [tasksCount]`: Assign community services tasks to a player by ID, specifying how many tasks they need to complete.
   - `/stopComserv [id]`: Stop or end the community services tasks of a player.
 - **Clothing & Inventory Management**: Automatically change the player’s clothes, remove certain items, and set their inventory to "busy" mode, ensuring a realistic and immersive experience.
-- **Everything Configurable**: All HRComserv's features (staff commands, tasks types, locations, etc.) are configurable from its `config.lua` file
+- **Everything Configuratable**: All HRComserv's features (staff commands, tasks types, locations, etc.) are configuratable from its `config.lua` file
 - **Optimized for Performance**: Lightweight and optimized for use on your server, ensuring smooth operation even in high-traffic environments.
 
 ## Video Preview
