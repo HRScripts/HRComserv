@@ -28,7 +28,7 @@ end
 -- OnEvents
 
 HRLib.OnStart(nil, function()
-    MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL DEFAULT \'[]\',\n    `playerItems` json NOT NULL DEFAULT \'[]\'\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
+    MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL,\n    `playerItems` json NOT NULL\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
 
     local punishedPlayers <const> = MySQL.query.await('SELECT * FROM `community_services`;')
     if punishedPlayers[1] then
@@ -176,4 +176,5 @@ HRLib.RegCommand('stopComserv', true, true, function(args, _, IPlayer, FPlayer)
     else
         FPlayer:Notify(Translation.id_notFound, 'error')
     end
+
 end, { help = Translation.suggestions.stopComserv_help, restricted = true, args = { { name = 'playerId', help = Translation.suggestions.stopComserv_arg1_help } } })
