@@ -34,7 +34,7 @@ end)
 RegisterNetEvent('HRComserv:comservPlayer', function()
     RemoveMarkers = nil
 
-    local randomLocation <const>, playerPed <const>, hasComservTasks = config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId(), LocalPlayer.state.hasComservTasks
+    local randomLocation <const>, playerPed <const>, hasComservTasks = ((LocalPlayer.state.hasComservTasks.alreadyHave and not config.disablePlacesChangeAfterRejoin) or not LocalPlayer.state.hasComservTasks) and config.comservLocations[math.random(1, #config.comservLocations)] or LocalPlayer.state.hasComservTasks.firstPlace, PlayerPedId(), LocalPlayer.state.hasComservTasks
     local currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
 
     while not hasComservTasks do

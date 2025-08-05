@@ -3,5 +3,6 @@ CREATE TABLE `community_services` (
     `identifier` varchar(48) NOT NULL PRIMARY KEY,
     `tasksCount` tinyint(4) NOT NULL DEFAULT 1,
     `normalClothes` json NOT NULL DEFAULT '[]',
-    `playerItems` json NOT NULL DEFAULT '[]'
+    `playerItems` json NOT NULL DEFAULT '[]',
+    `firstPlace` json NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

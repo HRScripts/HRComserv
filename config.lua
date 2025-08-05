@@ -143,4 +143,6 @@ config.tasksMarker = {
     alpha = 255
 }
 
+config.disablePlacesChangeAfterRejoin = false -- When this is set to true, when the player is first set to community services and rejoins, it stays on the same place as before it leaved (otherwise it changes its place)
+
 return config

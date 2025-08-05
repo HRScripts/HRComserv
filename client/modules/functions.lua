@@ -145,16 +145,17 @@ functions.removeAllPlayerItems = function()
         TriggerServerEvent('HRComserv:removeAllPlayerItems', inventory)
     elseif inventory == 'standalone' then
         local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), PlayerPedId()
+        if pedWeapons then
+            for i=1, #pedWeapons do
+                RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
 
-        for i=1, #pedWeapons do
-            RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
+                pedWeapons[i] = { name = pedWeapons[i], count = GetAmmoInPedWeapon(playerPed, joaat(pedWeapons[i])) } ---@diagnostic disable-line: assign-type-mismatch
+            end
 
-            pedWeapons[i] = { name = pedWeapons[i], count = GetAmmoInPedWeapon(playerPed, joaat(pedWeapons[i])) } ---@diagnostic disable-line: assign-type-mismatch
+            local hasComservTasks <const> = LocalPlayer.state.hasComservTasks
+            hasComservTasks.playerItems = pedWeapons
+            LocalPlayer.state:set('hasComservTasks', hasComservTasks, true)
         end
-
-        local hasComservTasks <const> = LocalPlayer.state.hasComservTasks
-        hasComservTasks.playerItems = pedWeapons
-        LocalPlayer.state:set('hasComservTasks', hasComservTasks, true)
     end ---@diagnostic disable-line: missing-return
 end
 

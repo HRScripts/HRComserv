@@ -10,6 +10,7 @@
 ---@field finishComservPosition vector3
 ---@field restorePlayerItems boolean
 ---@field removePlayerItems boolean
+---@field disablePlacesChangeAfterRejoin boolean
 
 ---@class HRComservClientFunctions
 ---@field setClothes fun(targetPed: integer)
