@@ -15,7 +15,7 @@ HRLib.OnPlSpawn(function()
             Wait(10)
         end
 
-        if LocalPlayer.state.hasComservTasks and not RemoveMarkers then
+        if LocalPlayer.state.hasComservTasks and RemoveMarkers then
             TriggerEvent('HRComserv:comservPlayer')
         end
 
