@@ -29,4 +29,5 @@
 ---@field comserv_failed_invalidTasksCount string
 ---@field stopComserv_successful string
 ---@field stopComserv_failed_hasNoComserv string
+---@field startTaskButtonPrefix string
 ---@field suggestions { comserv_help: string, comserv_arg1_help: string, comserv_arg2_help: string, stopComserv_help: string, stopComserv_arg1_help: string }

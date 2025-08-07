@@ -7,6 +7,7 @@ return {
         comserv_failed_invalidTasksCount = 'Невалиден брой задачи!',
         stopComserv_successful = 'Вие успешно премахнахте задачите на %s!',
         stopComserv_failed_hasNoComserv = 'Играча не е пращан на обществено полезен труд',
+        startTaskButtonPrefix = '[E] - За да започнеш задачата',
         suggestions = {
             comserv_help = 'Изпрати някой на обществено полезен труд',
             comserv_arg1_help = 'Съществуващо Id на играч',
@@ -23,6 +24,7 @@ return {
         comserv_failed_invalidTasksCount = 'Invalid task count!',
         stopComserv_successful = 'You have successfully removed the tasks of %s!',
         stopComserv_failed_hasNoComserv = 'The player has not been sent to community service',
+        startTaskButtonPrefix = '[E] - To start task',
         suggestions = {
             comserv_help = 'Send someone to community service',
             comserv_arg1_help = 'Existing Player Id',
@@ -39,6 +41,7 @@ return {
         comserv_failed_invalidTasksCount = 'Неверное количество задач!',
         stopComserv_successful = 'Вы успешно удалили задачи %s!',
         stopComserv_failed_hasNoComserv = 'Игрок не был отправлен на общественные работы',
+        startTaskButtonPrefix = '[E] - Запустить задачу',
         suggestions = {
             comserv_help = 'Отправить кого-нибудь на общественные работы',
             comserv_arg1_help = 'Существующий идентификатор игрока',
@@ -55,6 +58,7 @@ return {
         comserv_failed_invalidTasksCount = 'Ungültige Aufgabenanzahl!',
         stopComserv_successful = 'Sie haben die Aufgaben von %s erfolgreich entfernt!',
         stopComserv_failed_hasNoComserv = 'Der Player wurde nicht zum Community-Dienst geschickt',
+        startTaskButtonPrefix = '[E] - Zum Starten der Aufgabe',
         suggestions = {
             comserv_help = 'Jemanden zum Zivildienst schicken',
             comserv_arg1_help = 'Vorhandene Spieler-ID',
@@ -71,6 +75,7 @@ return {
         comserv_failed_invalidTasksCount = 'Conteggio attività non valido!',
         stopComserv_successful = 'Hai rimosso con successo le attività di %s!',
         stopComserv_failed_hasNoComserv = 'Il giocatore non è stato inviato al servizio comunitario',
+        startTaskButtonPrefix = '[E] - Per avviare l\'attività',
         suggestions = {
             comserv_help = 'Invia qualcuno al servizio comunitario',
             comserv_arg1_help = 'ID giocatore esistente',

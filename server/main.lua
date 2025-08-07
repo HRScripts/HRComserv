@@ -31,14 +31,27 @@ HRLib.OnStart(nil, function()
     MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL DEFAULT \'[]\',\n    `playerItems` json NOT NULL DEFAULT \'[]\',\n    `firstPlace` json NOT NULL\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
 
     local punishedPlayers <const> = MySQL.query.await('SELECT * FROM `community_services`;')
-    if punishedPlayers[1] then
+    if #punishedPlayers > 0 then
         local players <const> = GetPlayers()
         for i=1, #players do
             HRLib.table.focusedArray(punishedPlayers, { identifier = HRLib.PlayerIdentifier(tonumber(players[i]) --[[@as integer]], 'license') }, function(_, curr)
-                Player(players[i]).state.hasComservTasks = { tasksCount = curr.tasksCount, skin = curr.normalClothes, playerItems = json.decode(curr.playerItems), firstPlace = vector3(table.unpack(json.decode(curr.firstPlace))), alreadyHave = true }
-
-                TriggerClientEvent('HRComserv:comservPlayer', tonumber(players[i]) --[[@as integer]], curr.tasksCount)
+                Player(tonumber(players[i]) --[[@as integer]]).state.hasComservTasks = { tasksCount = curr.tasksCount, skin = curr.normalClothes, playerItems = json.decode(curr.playerItems), firstPlace = vector3(table.unpack(HRLib.table.deepclone(json.decode(curr.firstPlace), true))), alreadyHave = true }
             end)
+        end
+    end
+end)
+
+HRLib.OnStop(nil, function()
+    local players <const> = GetPlayers()
+    for i=1, #players do
+        local curr <const> = tonumber(players[i]) --[[@as integer]]
+        local currState <const>, currIdentifier <const> = Player(curr).state.hasComservTasks, HRLib.PlayerIdentifier(curr, 'license')
+        if currState then
+            if not currState.alreadyHave then
+                MySQL.insert('INSERT INTO `community_services` (`identifier`, `tasksCount`, `normalClothes`, `playerItems`, `firstPlace`) VALUES (?, ?, ?, ?, ?);', { currIdentifier, currState.tasksCount, currState.skin, json.encode(currState.playerItems), json.encode(currState.firstPlace) })
+            else
+                MySQL.update('UPDATE `community_services` SET `tasksCount` = ? WHERE `identifier` = ?;', { currState.tasksCount, currIdentifier })
+            end
         end
     end
 end)
@@ -46,7 +59,7 @@ end)
 HRLib.OnPlJoining(function(source)
     local playerComservs <const> = MySQL.single.await('SELECT * FROM `community_services` WHERE `identifier` = ?;', { HRLib.PlayerIdentifier(source, 'license') })
     if playerComservs then
-        Player(source).state.hasComservTasks = { tasksCount = playerComservs.tasksCount, skin = playerComservs.normalClothes, playerItems = json.decode(playerComservs.playerItems), firstPlace = vector3(table.unpack(json.decode(playerComservs.firstPlace))), alreadyHave = true }
+        Player(source).state.hasComservTasks = { tasksCount = playerComservs.tasksCount, skin = playerComservs.normalClothes, playerItems = json.decode(playerComservs.playerItems), firstPlace = vector3(table.unpack(HRLib.table.deepclone(json.decode(playerComservs.firstPlace), true))), alreadyHave = true }
     end
 end)
 
@@ -55,7 +68,7 @@ HRLib.OnPlDisc(function(source)
     local playerState <const>, playerIdentifier <const> = Player(source).state?.hasComservTasks, HRLib.PlayerIdentifier(source, 'license')
     if playerState then
         if not playerState.alreadyHave then
-            MySQL.insert('INSERT INTO `community_services` (`identifier`, `tasksCount`, `normalClothes`, `playerItems`, `firstPlace`) VALUES (?, ?, ?, ?, ?);', { playerIdentifier, playerState.tasksCount, playerState.skin, json.encode(playerState.playerItems) })
+            MySQL.insert('INSERT INTO `community_services` (`identifier`, `tasksCount`, `normalClothes`, `playerItems`, `firstPlace`) VALUES (?, ?, ?, ?, ?);', { playerIdentifier, playerState.tasksCount, playerState.skin, json.encode(playerState.playerItems), json.encode(playerState.firstPlace) })
         else
             MySQL.update('UPDATE `community_services` SET `tasksCount` = ? WHERE `identifier` = ?;', { playerState.tasksCount, playerIdentifier })
         end
@@ -143,6 +156,7 @@ HRLib.RegCommand('comserv', true, true, function(args, _, IPlayer, FPlayer)
         if tasksCount then
             if not Player(playerId).state.hasComservTasks then
                 Player(playerId).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', playerId) }
+
                 TriggerClientEvent('HRComserv:comservPlayer', playerId)
             else
                 local hasComservTasks <const> = HRLib.table.deepclone(Player(playerId).state.hasComservTasks, true)
