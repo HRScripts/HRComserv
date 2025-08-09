@@ -114,6 +114,7 @@ functions.startTask = function(taskType, playerPosition)
 
         local boneIndex <const> = GetPedBoneIndex(playerPed, 0xDEAD)
         local hammerPosition <const> = GetPedBoneCoords(playerPed, boneIndex, 0.35, 0.2, -0.6)
+        HRLib.RequestModel(`w_me_hammer`)
         tool = CreateObject(`w_me_hammer`, hammerPosition, false, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
         AttachEntityToEntity(tool, playerPed, boneIndex, 0.09, -0.1, -0.05, 1000.0, 0.0, 0.0, false, false, false, false, 2, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
     elseif taskType == 'digging' then
@@ -123,6 +124,7 @@ functions.startTask = function(taskType, playerPosition)
 
         local boneIndex <const> = GetPedBoneIndex(playerPed, 28422)
         local hammerPosition <const> = GetPedBoneCoords(playerPed, boneIndex, 0.35, 0.2, -0.6)
+        HRLib.RequestModel(`prop_tool_broom`)
         tool = CreateObject(`prop_tool_broom`, hammerPosition, false, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
         AttachEntityToEntity(tool, playerPed, boneIndex, -0.005, 0.0, 0.0, 360.0, 360.0, 0.0, false, false, false, false, 2, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
     end

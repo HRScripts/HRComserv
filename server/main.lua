@@ -36,6 +36,8 @@ HRLib.OnStart(nil, function()
         for i=1, #players do
             HRLib.table.focusedArray(punishedPlayers, { identifier = HRLib.PlayerIdentifier(tonumber(players[i]) --[[@as integer]], 'license') }, function(_, curr)
                 Player(tonumber(players[i]) --[[@as integer]]).state.hasComservTasks = { tasksCount = curr.tasksCount, skin = curr.normalClothes, playerItems = json.decode(curr.playerItems), firstPlace = vector3(table.unpack(HRLib.table.deepclone(json.decode(curr.firstPlace), true))), alreadyHave = true }
+
+                TriggerClientEvent('HRComserv:comservPlayer', tonumber(players[i]) --[[@as integer]])
             end)
         end
     end
@@ -116,7 +118,7 @@ RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType)
             inventoryFunctions:RemoveItem(source, v.name, v.count)
         end
 
-        local hasComservTasks = Player(source).state.hasComservTasks
+        local hasComservTasks <const> = Player(source).state.hasComservTasks
         hasComservTasks.playerItems = playerItems
         Player(source).state.hasComservTasks = hasComservTasks
     end
@@ -127,6 +129,7 @@ end)
 exports('comservPlayer', function(playerId, tasksCount)
     if not Player(playerId).state.hasComservTasks and type(playerId) == 'number' and type(tasksCount) == 'number' then
         Player(playerId).state.hasComservTasks = { tasksCount = tasksCount, skin = HRLib.ClientCallback('getSkin', source) }
+
         TriggerClientEvent('HRComserv:comservPlayer', playerId)
 
         local currConfig <const> = config.discordLogs
