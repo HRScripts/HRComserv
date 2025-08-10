@@ -1,7 +1,7 @@
 local HRLib <const>, Translation <const> = HRLib, Translation --[[@as HRComservTranslation]]
 local config <const>, functions <const> = HRLib.require(('@%s/config.lua'):format(GetCurrentResourceName())) --[[@as HRComservConfig]], HRLib.require('@HRComserv/client/modules/functions.lua') --[[@as HRComservClientFunctions]]
 local textUIMessages <const> = { Translation.prefix_textUI, Translation.startTaskButtonPrefix:format(HRLib.Keys[config.taskButton]) }
-local firstSpawned, stopped, threadsStopped = true, nil, { false, false }
+local firstSpawned, stopped, threadsStopped, hasChange = true, nil, { false, false }, false
 
 -- Functions
 
@@ -27,6 +27,7 @@ local comservPlayer = function()
 
     if stopped then stopped = nil end
     if threadsStopped[1] or threadsStopped[2] then threadsStopped = { false, false } end
+    if hasChange then hasChange = false end
 
     local hasComservTasks = LocalPlayer.state.hasComservTasks
     local randomLocation <const>, playerPed <const> = hasComservTasks.alreadyHave and not config.disablePlacesChangeAfterRejoin and config.comservLocations[math.random(1, #config.comservLocations)] or hasComservTasks.alreadyHave and config.comservLocations[select(2, HRLib.table.find(config.comservLocations, { spawnLocation = vector3(hasComservTasks.firstPlace[1], hasComservTasks.firstPlace[2], hasComservTasks.firstPlace[3]) }, true))] or config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId()
@@ -78,7 +79,7 @@ local comservPlayer = function()
                 currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
             else
                 local isOpen <const>, text <const> = HRLib.isTextUIOpen(true)
-                if isOpen and text == textUIMessages[2] and taskDistance > 1.5 then
+                if (isOpen and text == textUIMessages[2] and taskDistance > 1.5) or hasChange then
                     HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
                 end
             end
@@ -143,3 +144,11 @@ RegisterNetEvent('HRComserv:comservPlayer', function()
 end)
 
 RegisterNetEvent('HRComserv:stopComserv', stopComserv)
+
+-- State Bag Change Handlers
+
+AddStateBagChangeHandler('hasComservTasks', '', function(_, _, value)
+    if value and not stopped then
+        hasChange = true
+    end
+end)
