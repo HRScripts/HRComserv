@@ -91,11 +91,16 @@ local comservPlayer = function()
         while not stopped do
             Wait(1000)
 
+            SetEntityInvincible(PlayerPedId(), true)
+            functions.healPlayer()
+
             if #(GetEntityCoords(playerPed) - randomLocation.spawnCoords) > randomLocation.allowedDistance and not stopped then
                 SetEntityCoordsNoOffset(playerPed, randomLocation.spawnCoords.x, randomLocation.spawnCoords.y, randomLocation.spawnCoords.z) ---@diagnostic disable-line: missing-parameter
                 HRLib.Notify(Translation.tooFar, 'error')
             end
         end
+
+        SetEntityInvincible(PlayerPedId(), false)
 
         threadsStopped[2] = true
     end)
@@ -130,7 +135,7 @@ end)
 -- Events
 
 RegisterNetEvent('HRComserv:comservPlayer', function()
-    if stopped and not threadsStopped[1] or not threadsStopped[2] then
+    if stopped and (not threadsStopped[1] or not threadsStopped[2]) then
         repeat Wait(10) until threadsStopped[1] and threadsStopped[2]
     end
 
