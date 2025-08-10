@@ -173,4 +173,17 @@ functions.restoreAllPlayerItems = function()
     end
 end
 
+functions.healPlayer = function()
+    if HRLib.bridge.type == 'esx' then
+        TriggerEvent('esx_status:set', 'hunger', 1000000)
+        TriggerEvent('esx_status:set', 'thirst', 1000000)
+        TriggerEvent('esx_status:set', 'drunk', 0)
+
+        local playerPed <const> = PlayerPedId()
+        SetEntityHealth(playerPed, GetEntityMaxHealth(playerPed))
+    elseif HRLib.bridge.type == 'qb' then
+        TriggerEvent('hospital:client:HealInjuries', 'full')
+    end
+end
+
 return functions
