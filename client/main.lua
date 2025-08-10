@@ -8,6 +8,10 @@ local firstSpawned, stopped, threadsStopped, hasChange = true, nil, { false, fal
 local stopComserv = function(isFromCommand)
     stopped = true
 
+    if not threadsStopped[1] or not threadsStopped[2] then
+        repeat Wait(20) until threadsStopped[1] and threadsStopped[2]
+    end
+
     HRLib.hideTextUI()
     functions.restoreAllPlayerItems()
     SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
