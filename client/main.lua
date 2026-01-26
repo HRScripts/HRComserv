@@ -29,9 +29,9 @@ local comservPlayer = function()
         repeat Wait(10) until LocalPlayer.state.hasComservTasks ~= nil
     end
 
-    if stopped then stopped = nil end
-    if threadsStopped[1] or threadsStopped[2] then threadsStopped = { false, false } end
-    if hasChange then hasChange = false end
+    stopped = nil
+    threadsStopped = { false, false }
+    hasChange = false
 
     local hasComservTasks = LocalPlayer.state.hasComservTasks
     local randomLocation <const>, playerPed <const> = hasComservTasks.alreadyHave and not config.disablePlacesChangeAfterRejoin and config.comservLocations[math.random(1, #config.comservLocations)] or hasComservTasks.alreadyHave and config.comservLocations[select(2, HRLib.table.find(config.comservLocations, { spawnLocation = vector3(hasComservTasks.firstPlace[1], hasComservTasks.firstPlace[2], hasComservTasks.firstPlace[3]) }, true))] or config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId()
@@ -59,33 +59,37 @@ local comservPlayer = function()
             functions.createMarker(currentTask.coords)
 
             hasComservTasks = LocalPlayer.state.hasComservTasks
-            local taskDistance <const>, isPressed <const> = #(GetEntityCoords(playerPed) - vector3(currentTask.coords.x, currentTask.coords.y, currentTask.coords.z)), IsControlJustPressed(0, HRLib.Keys[config.taskButton])
-            if taskDistance <= 1.5 and not isPressed then
-                HRLib.showTextUI(textUIMessages[2])
-            elseif isPressed and taskDistance <= 1.5 then
-                local hasComservTasksCopy <const> = HRLib.table.deepclone(hasComservTasks, true)
-                hasComservTasksCopy.tasksCount = hasComservTasksCopy.tasksCount - 1
-                LocalPlayer.state:set('hasComservTasks', hasComservTasksCopy, true)
+            if hasComservTasks then
+                local taskDistance <const>, isPressed <const> = #(GetEntityCoords(playerPed) - vector3(currentTask.coords.x, currentTask.coords.y, currentTask.coords.z)), IsControlJustPressed(0, HRLib.Keys[config.taskButton])
+                if taskDistance <= 1.5 and not isPressed then
+                    HRLib.showTextUI(textUIMessages[2])
+                elseif isPressed and taskDistance <= 1.5 then
+                    local hasComservTasksCopy <const> = HRLib.table.deepclone(hasComservTasks, true)
+                    hasComservTasksCopy.tasksCount = hasComservTasksCopy.tasksCount - 1
+                    LocalPlayer.state:set('hasComservTasks', hasComservTasksCopy, true)
 
-                hasComservTasks = LocalPlayer.state.hasComservTasks
+                    hasComservTasks = LocalPlayer.state.hasComservTasks
 
-                HRLib.hideTextUI()
-                functions.startTask(currentTask.type, currentTask.coords)
+                    HRLib.hideTextUI()
+                    functions.startTask(currentTask.type, currentTask.coords)
 
-                if hasComservTasks.tasksCount == 0 then
-                    stopComserv(false)
+                    if hasComservTasks.tasksCount == 0 then
+                        stopComserv(false)
 
-                    break
+                        break
+                    else
+                        HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
+                    end
+
+                    currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
                 else
-                    HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
+                    local isOpen <const>, text <const> = HRLib.isTextUIOpen(true)
+                    if (isOpen and text == textUIMessages[2] and taskDistance > 1.5) or hasChange then
+                        HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
+                    end
                 end
-
-                currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
-            else
-                local isOpen <const>, text <const> = HRLib.isTextUIOpen(true)
-                if (isOpen and text == textUIMessages[2] and taskDistance > 1.5) or hasChange then
-                    HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
-                end
+            elseif HRLib.isTextUIOpen() then
+                HRLib.hideTextUI()
             end
         end
 

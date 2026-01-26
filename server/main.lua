@@ -88,7 +88,7 @@ RegisterNetEvent('HRComserv:finishedServices', function(isFromCommand)
         end
 
         if GetResourceState('ox_inventory') == 'started' or GetResourceState('qb-inventory') == 'started' then
-            local playerItems <const>, inventoryFunctions <const> = Player(source).state.hasComservTasks.playerItems, exports[GetResourceState('ox_inventory') == 'started' and 'ox_inventory' or 'qb-inventory']
+            local playerItems <const>, inventoryFunctions <const> = Player(source).state.hasComservTasks?.playerItems, exports[GetResourceState('ox_inventory') == 'started' and 'ox_inventory' or 'qb-inventory']
             if playerItems then
                 for i=1, #playerItems do
                     inventoryFunctions:AddItem(source, playerItems[i].name, playerItems[i].count)

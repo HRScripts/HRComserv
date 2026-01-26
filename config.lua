@@ -127,7 +127,7 @@ config.comservClothes = { -- Each field's value is the cloth number
 
 config.disableInventory = true
 
-config.restorePlayerItems = true -- Choose to restore the player's items/weapons after finishing it's tasks
+config.restorePlayerItems = true -- Choose to restore the player's items/weapons after finishing its tasks
 
 config.removePlayerItems = true
 
