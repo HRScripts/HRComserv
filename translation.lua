@@ -20,7 +20,7 @@ return {
         tooFar = 'You are too far from the task start point!',
         id_notFound = 'The player Id entered does not exist!',
         prefix_textUI = 'Remaining Tasks: %s',
-        comserv_successful = 'You successfully submitted the task player!',
+        comserv_successful = 'You successfully sent the player to community services!',
         comserv_failed_invalidTasksCount = 'Invalid task count!',
         stopComserv_successful = 'You have successfully removed the tasks of %s!',
         stopComserv_failed_hasNoComserv = 'The player has not been sent to community service',

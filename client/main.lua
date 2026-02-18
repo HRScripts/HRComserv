@@ -1,27 +1,29 @@
 local HRLib <const>, Translation <const> = HRLib, Translation --[[@as HRComservTranslation]]
 local config <const>, functions <const> = HRLib.require(('@%s/config.lua'):format(GetCurrentResourceName())) --[[@as HRComservConfig]], HRLib.require('@HRComserv/client/modules/functions.lua') --[[@as HRComservClientFunctions]]
 local textUIMessages <const> = { Translation.prefix_textUI, Translation.startTaskButtonPrefix:format(HRLib.Keys[config.taskButton]) }
-local firstSpawned, stopped, threadsStopped, hasChange = true, nil, { false, false }, false
+local stopped, threadsStopped, hasChange = nil, { false, false }, false
 
 -- Functions
 
 local stopComserv = function(isFromCommand)
-    stopped = true
+    Citizen.CreateThreadNow(function()
+        stopped = true
 
-    if not threadsStopped[1] or not threadsStopped[2] then
-        repeat Wait(20) until threadsStopped[1] and threadsStopped[2]
-    end
+        if not threadsStopped[1] or not threadsStopped[2] then
+            repeat Wait(20) until threadsStopped[1] and threadsStopped[2]
+        end
 
-    HRLib.hideTextUI()
-    functions.restoreAllPlayerItems()
-    SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
-    functions.setClothes(PlayerPedId(), json.decode(LocalPlayer.state.hasComservTasks.skin))
+        HRLib.hideTextUI()
+        functions.restoreAllPlayerItems()
+        SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
+        functions.setClothes(PlayerPedId(), json.decode(LocalPlayer.state.hasComservTasks.skin))
 
-    if config.disableInventory then
-        LocalPlayer.state:set('invBusy', false, true)
-    end
+        if config.disableInventory then
+            LocalPlayer.state:set('invBusy', false, true)
+        end
 
-    TriggerServerEvent('HRComserv:finishedServices', isFromCommand)
+        TriggerServerEvent('HRComserv:finishedServices', isFromCommand)
+    end)
 end
 
 local comservPlayer = function()
@@ -43,7 +45,10 @@ local comservPlayer = function()
         LocalPlayer.state:set('hasComservTasks', hasComservTasksCopy, true)
     end
 
-    functions.removeAllPlayerItems()
+    if not hasComservTasks.alreadyHave then
+        functions.removeAllPlayerItems()
+    end
+
     functions.setClothes(playerPed)
     SetEntityCoordsNoOffset(playerPed, randomLocation.spawnCoords) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
     HRLib.showTextUI(textUIMessages[1]:format(hasComservTasks.tasksCount))
@@ -52,7 +57,7 @@ local comservPlayer = function()
         LocalPlayer.state:set('invBusy', true, true)
     end
 
-    CreateThread(function()
+    Citizen.CreateThreadNow(function()
         while not stopped do
             Wait(4)
 
@@ -96,7 +101,7 @@ local comservPlayer = function()
         threadsStopped[1] = true
     end)
 
-    CreateThread(function()
+    Citizen.CreateThreadNow(function()
         while not stopped do
             Wait(1000)
 
@@ -117,21 +122,13 @@ end
 
 -- OnEvents
 
-if LocalPlayer.state.hasComservTasks and IsEntityOnScreen(PlayerPedId()) then
+if LocalPlayer.state.hasComservTasks and HRLib.bridge.isPlayerSpawned then
     comservPlayer()
 end
 
-HRLib.OnPlSpawn(function()
-    if firstSpawned then
-        while not IsEntityOnScreen(PlayerPedId()) do
-            Wait(10)
-        end
-
-        if LocalPlayer.state.hasComservTasks and not stopped then
-            comservPlayer()
-        end
-
-        firstSpawned = false
+HRLib.bridge.addPlayerSpawnFunction(function()
+    if LocalPlayer.state.hasComservTasks and not stopped then
+        comservPlayer()
     end
 end)
 

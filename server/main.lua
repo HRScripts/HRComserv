@@ -87,15 +87,6 @@ RegisterNetEvent('HRComserv:finishedServices', function(isFromCommand)
             MySQL.rawExecute('DELETE FROM `community_services` WHERE `identifier` = ?;', { playerIdentifier })
         end
 
-        if GetResourceState('ox_inventory') == 'started' or GetResourceState('qb-inventory') == 'started' then
-            local playerItems <const>, inventoryFunctions <const> = Player(source).state.hasComservTasks?.playerItems, exports[GetResourceState('ox_inventory') == 'started' and 'ox_inventory' or 'qb-inventory']
-            if playerItems then
-                for i=1, #playerItems do
-                    inventoryFunctions:AddItem(source, playerItems[i].name, playerItems[i].count)
-                end
-            end
-        end
-
         if not isFromCommand then
             local currConfig <const> = config.discordLogs
             local currMessage <const> = currConfig.settings.messages.finishComserv_message
@@ -108,21 +99,80 @@ RegisterNetEvent('HRComserv:finishedServices', function(isFromCommand)
     end
 end)
 
-RegisterNetEvent('HRComserv:removeAllPlayerItems', function(invType)
-    if not config.removePlayerItems then return end
+AddStateBagChangeHandler('HRComserv:removeAllPlayerItems', '', function(bagName, key, value)
+    if value and HRLib.string.find(bagName, 'player:') then
+        local playerId <const> = GetPlayerFromStateBagName(bagName)
+        if Player(playerId).state.hasComservTasks then
+            local playerItems
 
-    if Player(source).state.hasComservTasks then
-        local inventoryFunctions <const>, playerItems <const> = exports[invType == 'ox' and 'ox_inventory' or 'qb-inventory'], invType == 'ox' and exports.ox_inventory:GetInventoryItems(source) or exports['qb-core']:GetCoreObject().GetPlayer(source).PlayerData.items
+            if value ~= 'standalone' then
+                local inventoryFunctions <const> = value == 'ox' and exports.ox_inventory or exports['qb-core']:GetCoreObject().GetPlayer(playerId)
+                playerItems = value == 'ox' and inventoryFunctions:GetInventoryItems(playerId) or value == 'qb' and inventoryFunctions.PlayerData.items
 
-        for _,v in pairs(playerItems) do
-            inventoryFunctions:RemoveItem(source, v.name, v.count)
+                if playerItems then
+                    local removeItem <const> = value == 'ox' and function(name, count) inventoryFunctions:RemoveItem(playerId, name, count) end or inventoryFunctions.Functions.RemoveItem --[[@as function]]
+                    for _,v in pairs(playerItems) do
+                        removeItem(v.name, v.count)
+                    end
+                end
+            else
+                playerItems = HRLib.GetPedWeapons(playerId)
+
+                local ped <const> = GetPlayerPed(playerId)
+                for i=1, #playerItems do
+                    RemoveWeaponFromPed(ped, joaat(playerItems[i]))
+                end
+            end
+
+            local hasComservTasks <const> = Player(playerId).state.hasComservTasks
+            hasComservTasks.playerItems = playerItems or {}
+            Player(playerId).state.hasComservTasks = hasComservTasks
         end
 
-        local hasComservTasks <const> = Player(source).state.hasComservTasks
-        hasComservTasks.playerItems = playerItems
-        Player(source).state.hasComservTasks = hasComservTasks
+        if Player(playerId).state[key] == value then
+            Player(playerId).state[key] = nil
+        else
+            Citizen.CreateThreadNow(function()
+                repeat Wait(10) until Player(playerId).state[key] == value
+
+                Player(playerId).state[key] = nil
+            end)
+        end
     end
 end)
+
+do
+    AddStateBagChangeHandler('HRComserv:restorePlayerItems', '', function(bagName, key, value)
+        if value and HRLib.string.find(bagName, 'player:') then
+            local playerId <const> = GetPlayerFromStateBagName(bagName)
+
+            local playerItems <const> = Player(playerId).state.hasComservTasks.playerItems
+            if value == 'ox' then
+                local ox_inventory <const> = exports.ox_inventory
+                for i=1, #playerItems do
+                    local item <const> = playerItems[i]
+                    ox_inventory:AddItem(playerId, item.name, item.count, item.metadata, item.slot)
+                end
+            elseif value == 'qb' then
+                local addItem <const> = exports['qb-core']:GetPlayer(playerId).Functions.AddItem
+                for i=1, #playerItems do
+                    local item <const> = playerItems[i]
+                    addItem(item.name, item.amount, item.slot, item.info)
+                end
+            end
+
+            if Player(playerId).state[key] == value then
+                Player(playerId).state[key] = nil
+            else
+                Citizen.CreateThreadNow(function()
+                    repeat Wait(10) until Player(playerId).state[key] == value
+
+                    Player(playerId).state[key] = nil
+                end)
+            end
+        end
+    end)
+end
 
 -- Exports
 

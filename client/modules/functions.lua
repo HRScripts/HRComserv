@@ -138,37 +138,59 @@ functions.startTask = function(taskType, playerPosition)
     end
 end
 
----@return string[]|{ name: string, count: integer }?
-functions.removeAllPlayerItems = function()
-    if not config.removePlayerItems then return end
-
+do
     local inventory <const> = GetResourceState('ox_inventory') and 'ox' or GetResourceState('qb-inventory') and 'qb' or 'standalone'
-    if inventory == 'ox' or inventory == 'qb' then
-        TriggerServerEvent('HRComserv:removeAllPlayerItems', inventory)
-    elseif inventory == 'standalone' then
-        local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), PlayerPedId()
-        if pedWeapons then
-            for i=1, #pedWeapons do
-                RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
 
-                pedWeapons[i] = { name = pedWeapons[i], count = GetAmmoInPedWeapon(playerPed, joaat(pedWeapons[i])) } ---@diagnostic disable-line: assign-type-mismatch
+    LocalPlayer.state:set('HRComserv:removeAllPlayerItems', nil, true)
+    LocalPlayer.state:set('HRComserv:restorePlayerItems', nil, true)
+
+    functions.removeAllPlayerItems = function()
+        if not config.removePlayerItems then return end
+
+        if inventory == 'ox' or inventory == 'qb' then
+            LocalPlayer.state:set('HRComserv:removeAllPlayerItems', inventory, true)
+        elseif inventory == 'standalone' then
+            local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), PlayerPedId()
+            if pedWeapons then
+                for i=1, #pedWeapons do
+                    RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
+
+                    pedWeapons[i] = { name = pedWeapons[i], count = GetAmmoInPedWeapon(playerPed, joaat(pedWeapons[i])) } ---@diagnostic disable-line: assign-type-mismatch
+                end
+
+                local hasComservTasks <const> = LocalPlayer.state.hasComservTasks
+                hasComservTasks.playerItems = pedWeapons
+                LocalPlayer.state:set('hasComservTasks', hasComservTasks, true)
             end
-
-            local hasComservTasks <const> = LocalPlayer.state.hasComservTasks
-            hasComservTasks.playerItems = pedWeapons
-            LocalPlayer.state:set('hasComservTasks', hasComservTasks, true)
         end
-    end ---@diagnostic disable-line: missing-return
-end
+    end
 
-functions.restoreAllPlayerItems = function()
-    if config.restorePlayerItems then
-        local inventory <const> = GetResourceState('ox_inventory') and 'ox' or GetResourceState('qb-inventory') and 'qb' or 'standalone'
-        if inventory == 'standalone' then
-            local playerWeapons <const>, playerPed <const> = LocalPlayer.state.hasComservTasks.playerItems, PlayerPedId()
-            for i=1, #playerWeapons do
-                GiveWeaponToPed(playerPed, joaat(playerWeapons[i].name), playerWeapons[i].count, true, false)
+    functions.restoreAllPlayerItems = function()
+        if config.restorePlayerItems then
+            if inventory == 'standalone' then
+                local playerWeapons <const>, playerPed <const> = LocalPlayer.state.hasComservTasks.playerItems, PlayerPedId()
+                if playerWeapons and #playerWeapons > 0 then
+                    for i=1, #playerWeapons do
+                        GiveWeaponToPed(playerPed, joaat(playerWeapons[i].name), playerWeapons[i].count, true, false)
+                    end
+                end
+            elseif inventory == 'ox' or inventory == 'qb' then
+                LocalPlayer.state:set('HRComserv:restorePlayerItems', inventory, true)
             end
+        end
+    end
+
+    functions.getAllItems = function()
+        if config.restorePlayerItems then
+            if inventory == 'standalone' then
+                return HRLib.GetPedWeapons()
+            elseif inventory == 'ox' then
+                return exports.ox_inventory:GetPlayerItems()
+            elseif inventory == 'qb' then
+                return exports['qb-core']:GetCoreObject({ 'Functions' }).Functions.GetPlayerData().items
+            end
+        else
+            return {}
         end
     end
 end
