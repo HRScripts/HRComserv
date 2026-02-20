@@ -122,15 +122,28 @@ end
 
 -- OnEvents
 
-if LocalPlayer.state.hasComservTasks and HRLib.bridge.isPlayerSpawned then
+if LocalPlayer.state.hasComservTasks and ((HRLib.bridge.type ~= 'unknown_unusedBridge' and HRLib.bridge.isPlayerSpawned) or (HRLib.bridge.type == 'unknown_unusedBridge' and IsEntityOnScreen(HRLib.IPlayer.ped))) then
     comservPlayer()
 end
 
-HRLib.bridge.addPlayerSpawnFunction(function()
-    if LocalPlayer.state.hasComservTasks and not stopped then
-        comservPlayer()
-    end
-end)
+if HRLib.bridge.type ~= 'unknown_unusedBridge' then
+    HRLib.bridge.addPlayerSpawnFunction(function()
+        if LocalPlayer.state.hasComservTasks and not stopped then
+            comservPlayer()
+        end
+    end)
+else
+    local spawnedAlready = false
+    HRLib.OnPlSpawn(function()
+        if not spawnedAlready then
+            spawnedAlready = true
+
+            if LocalPlayer.state.hasComservTasks and not stopped then
+                comservPlayer()
+            end
+        end
+    end)
+end
 
 -- Callbacks
 

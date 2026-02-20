@@ -205,6 +205,9 @@ functions.healPlayer = function()
         SetEntityHealth(playerPed, GetEntityMaxHealth(playerPed))
     elseif HRLib.bridge.type == 'qb' then
         TriggerEvent('hospital:client:HealInjuries', 'full')
+    else
+        local playerPed <const> = HRLib.IPlayer.ped
+        SetEntityHealth(playerPed, GetPedMaxHealth(playerPed))
     end
 end
 
