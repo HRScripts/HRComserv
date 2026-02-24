@@ -15,8 +15,12 @@ local stopComserv = function(isFromCommand)
 
         HRLib.hideTextUI()
         functions.restoreAllPlayerItems()
-        SetEntityCoordsNoOffset(PlayerPedId(), config.finishComservPosition) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
-        functions.setClothes(PlayerPedId(), json.decode(LocalPlayer.state.hasComservTasks.skin))
+
+        do
+            local playerPed <const> = HRLib.IPlayer.ped
+            SetEntityCoordsNoOffset(playerPed, table.unpack(config.finishComservPosition))
+            functions.setClothes(playerPed, json.decode(LocalPlayer.state.hasComservTasks.skin))
+        end
 
         if config.disableInventory then
             LocalPlayer.state:set('invBusy', false, true)
@@ -36,7 +40,7 @@ local comservPlayer = function()
     hasChange = false
 
     local hasComservTasks = LocalPlayer.state.hasComservTasks
-    local randomLocation <const>, playerPed <const> = hasComservTasks.alreadyHave and not config.disablePlacesChangeAfterRejoin and config.comservLocations[math.random(1, #config.comservLocations)] or hasComservTasks.alreadyHave and config.comservLocations[select(2, HRLib.table.find(config.comservLocations, { spawnLocation = vector3(hasComservTasks.firstPlace[1], hasComservTasks.firstPlace[2], hasComservTasks.firstPlace[3]) }, true))] or config.comservLocations[math.random(1, #config.comservLocations)], PlayerPedId()
+    local randomLocation <const>, playerPed <const> = hasComservTasks.alreadyHave and not config.disablePlacesChangeAfterRejoin and config.comservLocations[math.random(1, #config.comservLocations)] or hasComservTasks.alreadyHave and config.comservLocations[select(2, HRLib.table.find(config.comservLocations, { spawnLocation = vector3(hasComservTasks.firstPlace[1], hasComservTasks.firstPlace[2], hasComservTasks.firstPlace[3]) }, true))] or config.comservLocations[math.random(1, #config.comservLocations)], HRLib.IPlayer.ped
     local currentTask = randomLocation.tasks[math.random(#randomLocation.tasks)]
 
     if not hasComservTasks.firstPlace then
@@ -105,7 +109,7 @@ local comservPlayer = function()
         while not stopped do
             Wait(1000)
 
-            SetEntityInvincible(PlayerPedId(), true)
+            SetEntityInvincible(HRLib.IPlayer.ped, true)
             functions.healPlayer()
 
             if #(GetEntityCoords(playerPed) - randomLocation.spawnCoords) > randomLocation.allowedDistance and not stopped then
@@ -114,7 +118,7 @@ local comservPlayer = function()
             end
         end
 
-        SetEntityInvincible(PlayerPedId(), false)
+        SetEntityInvincible(HRLib.IPlayer.ped, false)
 
         threadsStopped[2] = true
     end)
@@ -148,7 +152,7 @@ end
 -- Callbacks
 
 HRLib.CreateCallback('getSkin', true, function()
-    return functions.getClothes(PlayerPedId())
+    return functions.getClothes(HRLib.IPlayer.ped)
 end)
 
 -- Events

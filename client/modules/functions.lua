@@ -99,7 +99,7 @@ end
 ---@param taskType 'hammerFix'|'digging'|'sweeping'
 ---@param playerPosition vector4
 functions.startTask = function(taskType, playerPosition)
-    local playerPed <const>, anim <const>, dict <const> = PlayerPedId(), table.unpack(taskType == 'hammerFix' and {'base', 'amb@world_human_hammering@male@base'} or taskType == 'digging' and { 'world_human_gardener_plant' } or taskType == 'sweeping' and { 'idle_a', 'amb@world_human_janitor@male@idle_a' } or {})
+    local playerPed <const>, anim <const>, dict <const> = HRLib.IPlayer.ped, table.unpack(taskType == 'hammerFix' and {'base', 'amb@world_human_hammering@male@base'} or taskType == 'digging' and { 'world_human_gardener_plant' } or taskType == 'sweeping' and { 'idle_a', 'amb@world_human_janitor@male@idle_a' } or {})
     local tool
 
     SetEntityCoords(playerPed, playerPosition.x, playerPosition.y, GetEntityCoords(playerPed).z - 1) ---@diagnostic disable-line: missing-parameter
@@ -118,7 +118,7 @@ functions.startTask = function(taskType, playerPosition)
         tool = CreateObject(`w_me_hammer`, hammerPosition, false, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
         AttachEntityToEntity(tool, playerPed, boneIndex, 0.09, -0.1, -0.05, 1000.0, 0.0, 0.0, false, false, false, false, 2, true) ---@diagnostic disable-line: missing-parameter, param-type-mismatch
     elseif taskType == 'digging' then
-        TaskStartScenarioInPlace(PlayerPedId(), anim, 0, false)
+        TaskStartScenarioInPlace(playerPed, anim, 0, false)
     elseif taskType == 'sweeping' then
         TaskPlayAnim(playerPed, dict, anim, 8.0, 8.0, -1, 1, 0.5, false, false, false)
 
@@ -150,10 +150,10 @@ do
         if inventory == 'ox' or inventory == 'qb' then
             LocalPlayer.state:set('HRComserv:removeAllPlayerItems', inventory, true)
         elseif inventory == 'standalone' then
-            local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), PlayerPedId()
+            local pedWeapons <const>, playerPed <const> = HRLib.GetPedWeapons(), HRLib.IPlayer.ped
             if pedWeapons then
                 for i=1, #pedWeapons do
-                    RemoveWeaponFromPed(PlayerPedId(), joaat(pedWeapons[i]))
+                    RemoveWeaponFromPed(playerPed, joaat(pedWeapons[i]))
 
                     pedWeapons[i] = { name = pedWeapons[i], count = GetAmmoInPedWeapon(playerPed, joaat(pedWeapons[i])) } ---@diagnostic disable-line: assign-type-mismatch
                 end
@@ -168,7 +168,7 @@ do
     functions.restoreAllPlayerItems = function()
         if config.restorePlayerItems then
             if inventory == 'standalone' then
-                local playerWeapons <const>, playerPed <const> = LocalPlayer.state.hasComservTasks.playerItems, PlayerPedId()
+                local playerWeapons <const>, playerPed <const> = LocalPlayer.state.hasComservTasks.playerItems, HRLib.IPlayer.ped
                 if playerWeapons and #playerWeapons > 0 then
                     for i=1, #playerWeapons do
                         GiveWeaponToPed(playerPed, joaat(playerWeapons[i].name), playerWeapons[i].count, true, false)
@@ -201,7 +201,7 @@ functions.healPlayer = function()
         TriggerEvent('esx_status:set', 'thirst', 1000000)
         TriggerEvent('esx_status:set', 'drunk', 0)
 
-        local playerPed <const> = PlayerPedId()
+        local playerPed <const> = HRLib.IPlayer.ped
         SetEntityHealth(playerPed, GetEntityMaxHealth(playerPed))
     elseif HRLib.bridge.type == 'qb' then
         TriggerEvent('hospital:client:HealInjuries', 'full')

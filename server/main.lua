@@ -28,7 +28,7 @@ end
 -- OnEvents
 
 HRLib.OnStart(nil, function()
-    MySQL.rawExecute.await('CREATE TABLE `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL,\n    `playerItems` json NOT NULL,\n    `firstPlace` json NOT NULL\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
+    MySQL.rawExecute.await('CREATE TABLE IF NOT EXISTS `community_services` (\n    `identifier` varchar(48) NOT NULL PRIMARY KEY,\n    `tasksCount` tinyint(4) NOT NULL DEFAULT 1,\n    `normalClothes` json NOT NULL,\n    `playerItems` json NOT NULL,\n    `firstPlace` json NOT NULL\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;')
 
     local punishedPlayers <const> = MySQL.query.await('SELECT * FROM `community_services`;')
     if #punishedPlayers > 0 then
